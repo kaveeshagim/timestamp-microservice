@@ -31,19 +31,18 @@ app.get("/api", function (req, res) {
   });
 });
 
-app.get("/api/:date", function (req, res) {
+app.get("/api/:date", (req, res) => {
   const dateParam = req.params.date;
-  let date;
 
-  // Check if the date is a valid Unix timestamp
-  if (!isNaN(dateParam)) {
-    date = new Date(parseInt(dateParam));
-  } else {
-    date = new Date(dateParam);
-  }
+  // Check if it's a UNIX timestamp (all digits)
+  const isUnixTimestamp = /^\d+$/.test(dateParam);
 
-  // If the date is invalid, return an error message
-  if (isNaN(date.getTime())) {
+  const date = isUnixTimestamp
+    ? new Date(parseInt(dateParam))
+    : new Date(dateParam);
+
+  // Check for invalid date
+  if (date.toString() === "Invalid Date") {
     return res.json({ error: "Invalid Date" });
   }
 
@@ -52,7 +51,6 @@ app.get("/api/:date", function (req, res) {
     utc: date.toUTCString(),
   });
 });
-
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
   console.log("Your app is listening on port " + listener.address().port);
